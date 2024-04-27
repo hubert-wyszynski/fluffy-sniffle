@@ -3,6 +3,7 @@ import { Metadata } from "next"
 import { allPages } from "contentlayer/generated"
 
 import { Mdx } from "@/components/mdx-components"
+import { AboutFooter } from "../about-footer"
 
 interface PageProps {
   params: {
@@ -49,8 +50,21 @@ export default async function PagePage({ params }: PageProps) {
     notFound()
   }
 
+  const isAboutPage = page.slugAsParams === "about"
+
+  if (isAboutPage) {
+    return (
+        <>
+          <article className="py-6 pt-14 prose dark:prose-invert">
+            <Mdx code={page.body.code} />
+          </article>
+          <AboutFooter />
+        </>
+    )
+  }
+
   return (
-    <article className="py-6 prose dark:prose-invert">
+    <article className="prose dark:prose-invert">
       <h1>{page.title}</h1>
       {page.description && <p className="text-xl">{page.description}</p>}
       <hr />

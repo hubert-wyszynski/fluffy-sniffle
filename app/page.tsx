@@ -1,15 +1,15 @@
 import { allPosts } from "@/.contentlayer/generated"
 import Link from "next/link"
-import { About } from "./about"
+import { MainHeader } from "./main-header"
 
 export default function Home() {
     return (
         <div className="prose dark:prose-invert">
-        <About />
+        <MainHeader />
         {allPosts.map((post) => (
             <article key={post._id} className="">
             <Link className="no-underline" href={post.slug}>
-                <h2 className="mb-1 text-pink-400">{post.title}</h2>
+                <h2 className="mb-1 text-pink-500 dark:text-pink-300 ">{post.title}</h2>
             </Link>
             {post.description && <p className="mt-0">{post.description}</p>}
             </article>

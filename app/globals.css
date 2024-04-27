@@ -1,3 +1,17 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.custom-dot-container {
+    background-size: 30px 30px;
+    background-image: radial-gradient(circle, #c9c9c9 1px, rgba(0, 0, 0, 0) 1px);
+    background-color: #fff;
+    border-radius: 8px;
+}
+
+.dark .dark\:custom-dot-container {
+    background-size: 30px 30px;
+    background-image: radial-gradient(circle, #777777 1px, rgba(0, 0, 0, 0) 1px);
+    background-color: transparent;
+    border-radius: 8px;
+}
