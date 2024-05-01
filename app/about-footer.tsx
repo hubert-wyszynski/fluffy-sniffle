@@ -17,7 +17,7 @@ export const AboutFooter = () => {
             </div>
             <div className="px-9 pb-9 pt-0 sm:p-14">
                 <div className="flex justify-start">
-                    <Image className="rounded-full m-0 w-32 h-32 md:w-auto md:h-auto" width="190" height="190" src="/me.jpeg" alt="me" />
+                    <Image className="rounded-full m-0 w-32 h-32 md:w-auto md:h-auto" width="180" height="180" src="/me.jpeg" alt="me" />
                 </div>
             </div>
         </div>
