@@ -16,9 +16,6 @@ export const MainHeader = () => {
                                 })
                             }
                         </div>
-                        <div className="flex">
-                            <Link className="no-underline hover:underline text-slate-900 dark:text-slate-50 font-normal" href="/about">more</Link>
-                        </div>
                     </div>
                 </div>
             </div>
