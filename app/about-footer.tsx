@@ -9,9 +9,9 @@ export const AboutFooter = () => {
                 <a className="bg-blue-500/20 dark:bg-blue-500/40 p-2 rounded-lg hover:underline" href="mailto:hub.wyszynski@gmail.com">hub.wyszynski@gmail.com</a>
                 <Link className="bg-blue-500/20 dark:bg-blue-500/40 p-2 rounded-lg hover:underline" rel="noopener noreferrer" target="_blank" href="https://www.linkedin.com/in/hubert-wyszy%C5%84ski-685473130/">also here (if you use that)</Link>
             </div>
-            <div className="text-sm flex flex-row gap-2">
+            <div className="text-sm flex flex-row gap-2 flex-wrap">
                 <span className="bg-blue-500/20 dark:bg-blue-500/40 p-2 rounded-lg">
-                    🙂
+                    #notondutytoday
                 </span>
                 <span className="bg-blue-500/20 dark:bg-blue-500/40 p-2 rounded-lg">
                     2024 © Hubert Wyszyński.
