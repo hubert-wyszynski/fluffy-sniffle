@@ -2,7 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 
 export const MainHeader = () => {
-    const description = "I am not on duty today. These are my personal notes on things I have learned or found interesting recently"
+    const description = "I am not on duty today. These are my personal notes on things I have learned or found interesting recently."
 
     return (
         <div className="mt-8 custom-dot-container dark:custom-dot-container">
