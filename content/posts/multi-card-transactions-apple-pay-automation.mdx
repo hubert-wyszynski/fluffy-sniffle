@@ -1,8 +1,169 @@
 ---
-title: Tracking multi-card transactions with Apple Pay automation and Telegram bot
-description: How I keep track of all my card transactions in one place
+title: Expenses tracking automation
+description: How do I track my expenses using Apple Pay and Telegram bot?
 date: "2024-05-07"
 readingTime: 10
 ---
 
-I have a few cards in my Apple Wallet... tbd
+Paying with Apple Pay is superb. It's fast, can be done with your phone or watch, and your Apple Wallet can store all your cards, boarding passes, tickets, etc. Additionally, it doesn't require an internet connection to work, so there's no need to carry your wallet anymore.
+
+Default [Wallet app](https://apps.apple.com/pl/app/apple-wallet/id1160481993) allows you to browse through your transactions history, but it is not so convenient to use. It does not provide any statistics, filtering options or possibility to export transactions data.
+
+It is not better if it comes to banking apps - clicking through the app to find a specific transaction is a nightmare. And if you are developer you can forget about accessing your transactions data programmatically.
+
+## Access to data is the key
+
+Well, it is an [information era](https://en.wikipedia.org/wiki/Information_Age) and there are countless pros of having access to your raw data. Even if it comes to so trivial thing like data related to your day-to-day expenses.
+
+Luckily there is a way to get access to Apple Pay data and building simple automation here is not so hard. I would like to present you a simple solution I have managed to build recently.
+
+## Main components of the solution
+
+My solution consists of:
+- Apple Shortcuts
+- Make.com
+- Open AI (it is 2024 and everyone is using it...)
+- Airtable
+- Telegram
+
+## Apple Shortcuts
+
+Apple Shortcuts is a tool that allows you to automate tasks on your Apple devices. You can build some workflows and add them as a widget to your home screen or run them based on some triggers.
+
+There are multiple triggers available:
+- time of the day (e.g. every day at 8:00 AM)
+- location (e.g. when you arrive at home)
+- wifi network (e.g. when you connect to your home wifi)
+- **tapping with Wallet Card**
+- and many more
+
+<Image className="rounded m-auto" width="250" height="300" src="/apple-shortcuts-triggers.jpeg" alt="Apple Shortcuts triggers" />
+That is the thing that makes it possible to build automation related to Apple Pay. Now we can build workflow that will be triggered every time we process payment.
+
+To get transaction data we need to build simple workflow:
+<Image className="rounded m-auto" width="500" height="300" src="/apple-shortcuts-endpoint-call.jpeg" alt="Apple Shortcuts: getting transaction data" />
+As you can see the only thing it does is to fetch transaction data and send POST request to an endpoint (**Make.com** scenario in my case).
+
+I have blurred URL as this is the entry point to my scenario and I don't want to get any spam-data there.
+
+## Make.com
+
+Make.com is no-code platform that allows you to build automation scenarios ultra fast. Of course I could build separate backend to handle all actions, but I wanted to try something new and Make.com is perfect for prototyping.
+
+My scenario looks like this:
+<Image className="rounded m-auto" width="600" height="300" src="/make-scenario-flow.jpeg" alt="Make scenario" />
+So technically it is an endpoint. We can break it down into steps:
+- webhook is triggered by Apple Shortcuts
+- then it sends data to Open AI to get category of the transaction
+- then it is saved in my database (Airtable)
+- finally it sends `200 OK` if everything went well
+
+I would like just to show you big picture here. I will not go into details of building scenario in Make.com. Setting each building block is quite intuitive if you have experience with building backend services.
+
+## Open AI
+
+I am sending some piece of data to Open AI to get category of the transaction. Just simple request to [create chat endpoint](https://platform.openai.com/docs/api-reference/chat/create).
+If you are familiar with writing prompts you might know that we can take advantage of 2 properties:
+- system message
+> The system message helps set the behavior of the assistant. For example, you can modify the personality of the assistant or provide specific instructions about how it should behave throughout the conversation.
+- user message (just user prompt)
+
+There are also [assistant and tool properties](https://platform.openai.com/docs/api-reference/chat/create#chat-create-messages), but I am not using them in my case.
+
+So as user message I am sending transaction data:
+```
+{
+    "amount": 12.34,
+    "vendor": "McDonald's",
+}
+```
+
+My system message originally was:
+```
+You are only allowed to return response in JSON format. Example:
+{
+    "category": "some category"
+}
+
+Rules:
+- category must be always english word (if nothing matches leave Other)
+
+Allowed categories:
+Grocery Shopping
+Bakery
+Fuel
+Health
+Clothing and Accessories
+Dining Out
+Entertainment
+Home
+Sport
+Transportation
+```
+
+And expected output here is:
+```
+{
+    "category": "Dining Out"
+}
+```
+
+For most of the cases it works well. But through time I have realised that sometimes model is missing knowledge about some places and returns `Other` when it definitely should assign some other category.
+I decided to extend system message with some facts:
+```
+Facts:
+Lubaszka, Putka, Gromulski are bakeries
+```
+And now it works much better.
+
+This is common case when you are working with AI models. You need to provide them with some additional knowledge to make them work better. Another option is to [fine tune](https://platform.openai.com/docs/guides/fine-tuning) model. You might find it useful if you find that model is not working well for your specific case. Passing additional information in prompt might consume so much tokens every time you send request. Fine tuning is more efficient in this case. You can save tokens and money in the long run.
+
+## Airtable
+
+I am using Airtable as my database. Resons why I have chosen it:
+- Make.com has smooth integration with Airtable
+- docs seems user-friendly
+- I have never used it before and I wanted to try something new
+- it turned out that mobile app serves pretty well for my use case (my table has only few columns so browsing through transaction on mobile is quite convenient)
+
+No much to say here. One table that is [source of truth](https://en.wikipedia.org/wiki/Single_source_of_truth) for my automation.
+
+<Image className="rounded m-auto" width="250" height="300" src="/airtable-example.jpeg" alt="Airtable" />
+
+All transactions, all cards in one place. I can easily filter or sort it. Better experience than banking apps I am using.
+
+## Telegram
+
+Additionally I have built simple Telegram bot. Telegram has [bots API](https://core.telegram.org/#bot-api) that allows you to build your own bot. For now I have just added some basic commands:
+- summarizing all my spendings in current month
+- summarizing spendings for fuel in current month
+- summarizing Lidl spendings (as I am doing lots of groceries there)
+
+All API calls needed here I am handling in another Make.com scenario. I am planning to rewrite it to my own backend in the future (number of active scenarios in Make.com is limited, at least in plan I am using).
+
+Each path serves one command.
+<Image className="rounded m-auto" width="700" height="300" src="/telegram-make-scenario.jpeg" alt="Telegram - Make.com scenario" />
+
+The most challenging part I found here was to get data from Airtable. There is an endpoint to [get records](https://airtable.com/developers/web/api/list-records#query-filterbyformula) with `filterFormula` parameter. [Formulas](https://support.airtable.com/docs/formula-field-reference) are kind of queries you can use to filter data.
+It took me some time to find correct one.
+
+Example of formula for getting this month's Lidl spendings is:
+```
+AND(
+    FIND("Lidl", {vendor}) > 0,
+    DATETIME_FORMAT({timestamp}, 'YYYY-MM') = DATETIME_FORMAT(NOW(), 'YYYY-MM')
+)
+```
+
+What I like about Airtable docs is that they have auto generated docs page for each of your tables. If you create some table it should appear [here](https://airtable.com/developers/web/api/introduction).
+
+Finally my bot looks like this:
+<Image className="rounded m-auto" width="250" height="300" src="/telegram-bot-1.jpeg" alt="Telegram bot" />
+And results after executing command:
+<Image className="rounded m-auto" width="250" height="300" src="/telegram-bot-2.jpeg" alt="Telegram bot" />
+
+## Summary
+
+I am quite happy with automation I have built. I have access to all my transactions data which opens up many possibilities.
+In the future I am planning to rewrite Make.com scenarios to my own backend.
+
