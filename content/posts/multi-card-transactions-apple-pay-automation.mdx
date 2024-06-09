@@ -1,7 +1,7 @@
 ---
-title: Expenses tracking automation
-description: How do I track my expenses using Apple Pay and Telegram bot?
-date: "2024-05-07"
+title: Apple Pay automation
+description: How I keep track of all my transactions with Apple Shortcuts and Telegram bot 
+date: "2024-06-09"
 readingTime: 10
 ---
 
@@ -70,14 +70,6 @@ If you are familiar with writing prompts you might know that we can take advanta
 
 There are also [assistant and tool properties](https://platform.openai.com/docs/api-reference/chat/create#chat-create-messages), but I am not using them in my case.
 
-So as user message I am sending transaction data:
-```
-{
-    "amount": 12.34,
-    "vendor": "McDonald's",
-}
-```
-
 My system message originally was:
 ```
 You are only allowed to return response in JSON format. Example:
@@ -101,6 +93,14 @@ Sport
 Transportation
 ```
 
+As user message I am sending transaction data:
+```
+{
+    "amount": 12.34,
+    "vendor": "McDonald's",
+}
+```
+
 And expected output here is:
 ```
 {
@@ -109,6 +109,7 @@ And expected output here is:
 ```
 
 For most of the cases it works well. But through time I have realised that sometimes model is missing knowledge about some places and returns `Other` when it definitely should assign some other category.
+
 I decided to extend system message with some facts:
 ```
 Facts:
@@ -116,7 +117,9 @@ Lubaszka, Putka, Gromulski are bakeries
 ```
 And now it works much better.
 
-This is common case when you are working with AI models. You need to provide them with some additional knowledge to make them work better. Another option is to [fine tune](https://platform.openai.com/docs/guides/fine-tuning) model. You might find it useful if you find that model is not working well for your specific case. Passing additional information in prompt might consume so much tokens every time you send request. Fine tuning is more efficient in this case. You can save tokens and money in the long run.
+This is common case when you are working with AI models. You need to provide them with some additional knowledge to make them work better.
+
+Another option is to [fine tune](https://platform.openai.com/docs/guides/fine-tuning) model. You might find it useful if model is not working well for your specific case. Passing additional information in prompt might consume so much tokens every time you send request. Fine tuning is more efficient in this case. You can save tokens and money in the long run.
 
 ## Airtable
 
@@ -139,9 +142,9 @@ Additionally I have built simple Telegram bot. Telegram has [bots API](https://c
 - summarizing spendings for fuel in current month
 - summarizing Lidl spendings (as I am doing lots of groceries there)
 
-All API calls needed here I am handling in another Make.com scenario. I am planning to rewrite it to my own backend in the future (number of active scenarios in Make.com is limited, at least in plan I am using).
+I am handling all API calls needed here in another Make.com scenario. I am planning to rewrite it to my own backend in the future (number of active scenarios in Make.com is limited, at least in plan I am using).
 
-Each path serves one command.
+Each path serves one command:
 <Image className="rounded m-auto" width="700" height="300" src="/telegram-make-scenario.jpeg" alt="Telegram - Make.com scenario" />
 
 The most challenging part I found here was to get data from Airtable. There is an endpoint to [get records](https://airtable.com/developers/web/api/list-records#query-filterbyformula) with `filterFormula` parameter. [Formulas](https://support.airtable.com/docs/formula-field-reference) are kind of queries you can use to filter data.
@@ -164,6 +167,12 @@ And results after executing command:
 
 ## Summary
 
-I am quite happy with automation I have built. I have access to all my transactions data which opens up many possibilities.
-In the future I am planning to rewrite Make.com scenarios to my own backend.
+I started using that in the beggining of March 2024 and I have collected almost 200 records so far. It works fine and I am happy with results. The most important thing is that I have access to my raw data which opens up many possibilities.
 
+Although I see some areas for improvement:
+- rewriting Make scenarios to my own backend
+- handling different currencies (very rare case for me, but it might be useful)
+- adding some more detailed stats to Telegram bot
+- maybe pack it all into mobile app (possibility to try mobile development which I have never done before)
+
+I hope you find this article useful and you have learned something new. Thanks for reading.
