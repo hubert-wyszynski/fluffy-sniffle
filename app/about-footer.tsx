@@ -11,9 +11,6 @@ export const AboutFooter = () => {
             </div>
             <div className="text-sm flex flex-row gap-2 flex-wrap">
                 <span className="bg-blue-500/20 dark:bg-blue-500/40 p-2 rounded-lg">
-                    #notondutytoday
-                </span>
-                <span className="bg-blue-500/20 dark:bg-blue-500/40 p-2 rounded-lg">
                     2024 © Hubert Wyszyński.
                 </span>
             </div>
